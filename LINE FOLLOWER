@@ -1,0 +1,115 @@
+// ==========================
+//   LINE FOLLOWER ROBOT
+//   Using L298N + 2 IR Sensors
+//   Tested & Working Code
+// ==========================
+
+// Motor A (Left Motor)
+const int ENA = 5;  // PWM pin for Motor A
+const int IN1 = 3;
+const int IN2 = 4;
+
+// Motor B (Right Motor)
+const int ENB = 6;  // PWM pin for Motor B
+const int IN3 = 2;
+const int IN4 = 7;
+
+// IR Sensors
+const int IRSensorLeft  = 8;  // Left IR sensor
+const int IRSensorRight = 9;  // Right IR sensor
+
+// Speeds (you can tune these)
+#define baseSpeed 100   // forward speed
+#define turnSpeed 130   // turning speed
+
+void setup() {
+  // Motor pins
+  pinMode(ENA, OUTPUT);
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+
+  pinMode(ENB, OUTPUT);
+  pinMode(IN3, OUTPUT);
+  pinMode(IN4, OUTPUT);
+
+  // IR sensors
+  pinMode(IRSensorLeft, INPUT);
+  pinMode(IRSensorRight, INPUT);
+
+  Serial.begin(9600);
+  Serial.println("Line Follower Robot Ready!");
+}
+
+void loop() {
+  // Read sensor values
+  bool leftSensor  = digitalRead(IRSensorLeft);
+  bool rightSensor = digitalRead(IRSensorRight);
+
+  // Show readings on Serial Monitor
+  Serial.print("Left Sensor: ");
+  Serial.print(leftSensor);
+  Serial.print(" | Right Sensor: ");
+  Serial.println(rightSensor);
+
+  // Logic: HIGH = white (no line), LOW = black (line)
+  if (leftSensor == HIGH && rightSensor == HIGH) {
+    moveForward();
+  } 
+  else if (leftSensor == HIGH && rightSensor == LOW) {
+    turnRight();
+  } 
+  else if (leftSensor == LOW && rightSensor == HIGH) {
+    turnLeft();
+  } 
+  else {
+    stopMotors();
+  }
+
+  delay(80); // small delay for smooth movement
+}
+
+// ------------------ MOTOR FUNCTIONS ------------------
+
+void moveForward() {
+  // Move both motors forward
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  analogWrite(ENA, baseSpeed);
+
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+  analogWrite(ENB, baseSpeed);
+}
+
+void turnRight() {
+  // Turn right (pivot)
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+  analogWrite(ENA, turnSpeed);
+
+  digitalWrite(IN3, HIGH);
+  digitalWrite(IN4, LOW);
+  analogWrite(ENB, turnSpeed);
+}
+
+void turnLeft() {
+  // Turn left (pivot)
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+  analogWrite(ENA, turnSpeed);
+
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, HIGH);
+  analogWrite(ENB, turnSpeed);
+}
+
+void stopMotors() {
+  // Stop both motors
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);
+  analogWrite(ENA, 0);
+
+  digitalWrite(IN3, LOW);
+  digitalWrite(IN4, LOW);
+  analogWrite(ENB, 0);
+}
